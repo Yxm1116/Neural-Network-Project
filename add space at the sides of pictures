@@ -1,0 +1,50 @@
+import os
+import pandas as pd
+import io
+import requests
+import numpy as np
+from scipy.stats import zscore
+from PIL import Image, ImageFile
+from matplotlib.pyplot import imshow
+import requests
+from io import BytesIO
+import numpy as np
+def fill_square_image(img):
+    # ************* Add your solution here*********
+    # You should not need to modify the other code.  
+    # The return statement should be replaced with your own.
+    img_array = np.asarray(img)
+    rows = img_array.shape[0]
+    cols = img_array.shape[1]
+
+    size = (max(img.size),)*2
+    npixels = img.size[0]*img.size[1]
+  # get colors as [(cnt1, (r1, g1, b1)), ...]
+    cols = img.getcolors(npixels)
+  # get [(c1*r1, c1*g1, c1*g2),...]
+    sumRGB = [(x[0]*x[1][0], x[0]*x[1][1], x[0]*x[1][2]) for x in cols] 
+  # calculate (sum(ci*ri)/np, sum(ci*gi)/np, sum(ci*bi)/np)
+  # the zip gives us [(c1*r1, c2*r2, ..), (c1*g1, c1*g2,...)...]
+    avg = tuple([int(sum(x)/npixels) for x in zip(*sumRGB)])
+    size = (max(img.size),)*2
+    layer = Image.new('RGB', size, avg)
+    layer.paste(img, tuple(map(lambda x:int((x[0]-x[1])/2), zip(size, img.size))))
+    return layer
+
+# Handle first image
+url = "https://github.com/jeffheaton/t81_558_deep_learning/raw/master/photos/hickory_home.jpg"
+
+response = requests.get(url)
+img = Image.open(BytesIO(response.content))
+img.load()
+submit_img1 = fill_square_image(img)
+display(submit_img1)
+
+# Handle second image
+url = "https://github.com/jeffheaton/t81_558_deep_learning/raw/master/photos/landscape.jpg"
+
+response = requests.get(url)
+img = Image.open(BytesIO(response.content))
+img.load()
+submit_img2 = fill_square_image(img)
+display(submit_img2)
